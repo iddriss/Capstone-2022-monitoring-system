@@ -1,26 +1,63 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import db from "./firebase.config";
 
 function App() {
+  const [acVoltage, setACVoltage] = useState<any>({});
+  const [batVoltage, setBattVoltage] = useState<any>({});
+  const [current, setCurrent] = useState<any>({});
+  const [temperature, setTemperature] = useState<any>({});
+
+  const fetchBlogs = async () => {
+    db.collection("inverter")
+      .doc("ac-voltage")
+      .onSnapshot((doc) => {
+        setACVoltage(doc.data());
+      });
+
+    db.collection("inverter")
+      .doc("battery-voltage")
+      .onSnapshot((doc) => {
+        setBattVoltage(doc.data());
+      });
+
+    db.collection("inverter")
+      .doc("current")
+      .onSnapshot((doc) => {
+        setCurrent(doc.data());
+      });
+
+    db.collection("inverter")
+      .doc("temperature")
+      .onSnapshot((doc) => {
+        setTemperature(doc.data());
+      });
+  };
+
+  fetchBlogs();
+
   return (
+    // <Connector brokerUrl={brokerUrl}>
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+      <div className="blog-container">
+        <p>AC Voltage: {acVoltage["ac-voltage"]} V</p>
+        <p>Battery Voltage: {batVoltage["bat-voltage"]} V</p>
+        <p>Current: {current["current"]} A</p>
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Load: {Number(acVoltage["ac-voltage"]) * Number(current["current"])} W
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <p>Temperature: {temperature["temp"]} C</p>
+      </div>
     </div>
+    // </Connector>
   );
 }
 
 export default App;
+
+// ac-voltage: "10"
+// bat-voltage: "20"
+// current: "10"
+// frequency: "10"
+// load: "5"
+// temperature: "10"
